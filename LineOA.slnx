@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LineOA/LineOA.Client/LineOA.Client.csproj" />
+  <Project Path="LineOA/LineOA/LineOA.csproj" />
+</Solution>

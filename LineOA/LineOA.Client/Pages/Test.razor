@@ -1,0 +1,59 @@
+﻿@page "/test"
+@inject IJSRuntime JS
+
+<h3>My Blazor LIFF App</h3>
+
+@if (!string.IsNullOrEmpty(ProfileName))
+{
+    <p>สวัสดีคุณ: @ProfileName</p>
+}
+else
+{
+    <p>กำลังโหลดข้อมูลจาก LINE...</p>
+}
+
+
+<script>
+    window.initializeLiff = (liffId) => {
+        return new Promise((resolve, reject) => {
+            liff.init({ liffId: liffId })
+                .then(() => {
+                    if (liff.isLoggedIn()) {
+                        // ถ้า Login แล้ว ให้ดึงชื่อโปรไฟล์ส่งกลับไป
+                        liff.getProfile().then(profile => {
+                            resolve(profile.displayName);
+                        });
+                    } else {
+                        // ถ้ายังไม่ Login ให้สั่ง Login เลย
+                        liff.login();
+                        resolve("Logging in...");
+                    }
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    };
+</script>
+
+@code {
+    private string ProfileName;
+    private string myLiffId = "ใส่_LIFF_ID_ที่คุณก๊อปมาจากสเต็ป2_ที่นี่ค่ะ";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // เรียกใช้ JavaScript ฟังก์ชันที่เราเขียนไว้
+                ProfileName = await JS.InvokeAsync<string>("initializeLiff", myLiffId);
+                StateHasChanged(); // สั่งให้หน้าจอวาดใหม่เพื่อแสดงชื่อ
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+    }
+}
